@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Вайбкодинг: путь от идеи до работающего кода</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F8;--surface:#FFFFFF;--ink:#16213E;--muted:#55607C;--line:#CBD3E6;
+  --mark:#FFD84A;--mark-ink:#16213E;--accent:#3B3FD8;--accent-ink:#FFFFFF;--ok:#12805C;
+  --code-bg:#16213E;--code-ink:#E8ECFA;
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11142B;--surface:#1A1F40;--ink:#E9ECFA;--muted:#A3ABCB;--line:#2D3463;
+    --mark:#FFD84A;--mark-ink:#11142B;--accent:#8E92FF;--accent-ink:#11142B;--ok:#4FD1A1;
+    --code-bg:#0B0D1F;--code-ink:#E8ECFA;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11142B;--surface:#1A1F40;--ink:#E9ECFA;--muted:#A3ABCB;--line:#2D3463;
+  --mark:#FFD84A;--mark-ink:#11142B;--accent:#8E92FF;--accent-ink:#11142B;--ok:#4FD1A1;
+  --code-bg:#0B0D1F;--code-ink:#E8ECFA;color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Onest,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+h1,h2,h3{font-family:Unbounded,"Arial Black",system-ui,sans-serif;line-height:1.12;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,6.2vw,4.2rem);font-weight:700}
+h2{font-size:clamp(1.5rem,3.6vw,2.3rem);font-weight:700}
+h3{font-size:1.05rem;font-weight:500}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.wrap{width:min(1080px,100% - 40px);margin-inline:auto}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{font-family:Unbounded,sans-serif;font-weight:700;font-size:1rem;text-decoration:none;color:var(--ink)}
+.brand span{background:var(--mark);color:var(--mark-ink);padding:0 .3em;border-radius:3px}
+nav{display:flex;gap:18px;margin-left:auto;overflow-x:auto}
+nav a{color:var(--muted);text-decoration:none;font-size:.95rem;white-space:nowrap}
+nav a:hover{color:var(--ink)}
+.theme{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;width:38px;height:38px;cursor:pointer;font-size:1rem;flex:none}
+section{padding:84px 0}
+.hero{padding:64px 0 72px}
+.hero p.lead{max-width:56ch;color:var(--muted);font-size:1.2rem;margin-top:22px}
+mark{background:linear-gradient(transparent 52%,var(--mark) 52% 92%,transparent 92%);color:inherit;padding:0 .08em}
+.demo{margin-top:44px;display:grid;grid-template-columns:1.05fr .95fr;gap:0;border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--surface)}
+.pane{padding:22px}
+.pane+.pane{border-left:2px solid var(--ink);background:var(--bg)}
+.pane h3{color:var(--muted);font-weight:500;font-size:.9rem;margin-bottom:12px}
+.prompt{min-height:7.2em;font-size:1.05rem}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-.15em;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-height:200px}
+.result .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.result .row:last-child{border:0}
+.result .box{width:18px;height:18px;border:2px solid var(--accent);border-radius:5px;flex:none}
+.result .box.on{background:var(--accent)}
+.result .big{font-family:Unbounded,sans-serif;font-size:2.4rem;font-weight:700}
+.result .btn{display:inline-block;background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:8px 16px;font-weight:600;font-size:.95rem;margin-top:10px}
+.sub{font-size:.85rem;color:var(--muted);margin-top:10px}
+.intro{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.intro p+p{margin-top:16px}
+.intro p{color:var(--muted)}
+.intro p strong{color:var(--ink);font-weight:600}
+.steps{list-style:none;margin:40px 0 0;padding:0;counter-reset:s;display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--surface)}
+.steps li{padding:22px;counter-increment:s;border-left:2px solid var(--ink)}
+.steps li:first-child{border-left:0}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--mark);color:var(--mark-ink);font-family:Unbounded,sans-serif;font-weight:700;margin-bottom:14px}
+.steps p{color:var(--muted);font-size:.95rem;margin-top:8px}
+.loopnote{margin-top:14px;color:var(--muted);font-size:.95rem}
+.compare{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.card h3{margin-bottom:12px}
+.card.bad{border-left:5px solid #D6455D}
+.card.good{border-left:5px solid var(--ok)}
+.card p{color:var(--muted)}
+.tabs{display:flex;gap:8px;margin:32px 0 0;flex-wrap:wrap}
+.tabs .chip{font-size:.95rem}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:20px;margin:0;overflow-x:auto;font-size:.9rem;line-height:1.55;white-space:pre-wrap}
+.checks{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:12px 28px;list-style:none;padding:0}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.checks input{margin-top:5px;accent-color:var(--accent);width:18px;height:18px;flex:none}
+.checks span{color:var(--muted)}
+.checks b{display:block;color:var(--ink);font-weight:600}
+.checks input:checked~div b{text-decoration:line-through;text-decoration-color:var(--ok)}
+.progress{margin-top:22px;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.plan{margin-top:32px;display:grid;gap:14px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 20px}
+summary{cursor:pointer;padding:16px 0;font-family:Unbounded,sans-serif;font-size:1rem;font-weight:500;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::after{content:"+";font-size:1.4rem;line-height:1}
+details[open] summary::after{content:"−"}
+details p{color:var(--muted);padding-bottom:18px}
+details ul{margin:0 0 18px;padding-left:20px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-size:.95rem}
+@media (max-width:820px){
+  .demo,.intro,.compare,.checks{grid-template-columns:1fr}
+  .pane+.pane{border-left:0;border-top:2px solid var(--ink)}
+  .steps{grid-template-columns:1fr 1fr}
+  .steps li:nth-child(3){border-left:0}
+  .steps li:nth-child(n+3){border-top:2px solid var(--ink)}
+  nav{display:none}
+  section{padding:60px 0}
+  .theme{margin-left:auto}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.caret{animation:none}.progress i{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="#top"><span>vibe</span>coding</a>
+  <nav aria-label="Разделы"><a href="#idea">Идея</a><a href="#loop">Цикл</a><a href="#prompts">Промпты</a><a href="#review">Проверка</a><a href="#plan">План</a></nav>
+  <button class="theme" id="theme" type="button" aria-label="Переключить тему">◐</button>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="wrap">
+  <h1>Опиши, что нужно. <mark>Проверь,</mark> что получилось.</h1>
+  <p class="lead">Вайбкодинг — это разработка, где ты пишешь задачу словами, а код собирает ИИ. Здесь короткий путь, как делать это осознанно: без хаоса и без кода, которого никто не понимает.</p>
+
+  <div class="demo" aria-label="Пример: промпт и результат">
+    <div class="pane">
+      <h3>Что ты пишешь</h3>
+      <p class="prompt" id="prompt" aria-live="polite"></p>
+      <div class="chips" id="chips" role="group" aria-label="Примеры промптов"></div>
+    </div>
+    <div class="pane">
+      <h3>Что получаешь</h3>
+      <div class="result" id="result"></div>
+      <p class="sub">Это иллюстрация: так выглядит результат, который ты потом проверяешь и дорабатываешь.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="idea"><div class="wrap intro">
+  <h2>Что значит «вайбкодить»</h2>
+  <div>
+    <p>Ты задаёшь <strong>намерение</strong>: что должно получиться и для кого. ИИ предлагает реализацию, ты запускаешь её и смотришь на результат, а не читаешь каждую строку сразу.</p>
+    <p>Это быстро для прототипов, личных инструментов и учебных проектов. Но чем дороже ошибка, тем больше ты читаешь и проверяешь сам: платежи, пароли, чужие данные не отдают на веру.</p>
+    <p>Хороший вайбкодер — не тот, кто не пишет код, а тот, кто умеет <strong>точно сформулировать задачу и быстро заметить, что результат неверный</strong>.</p>
+  </div>
+</div></section>
+
+<section id="loop"><div class="wrap">
+  <h2>Рабочий цикл из четырёх шагов</h2>
+  <ol class="steps">
+    <li><h3>Описать</h3><p>Цель, пользователь, ограничения. Одна небольшая задача за раз.</p></li>
+    <li><h3>Запустить</h3><p>Открой результат и пройди его руками, как обычный пользователь.</p></li>
+    <li><h3>Поправить</h3><p>Опиши, что именно не так: что ожидал, что увидел, текст ошибки.</p></li>
+    <li><h3>Зафиксировать</h3><p>Работает — сохрани версию в git, потом берись за следующий кусок.</p></li>
+  </ol>
+  <p class="loopnote">Шаги 2–4 повторяются, пока кусок не заработает. Фиксируй каждый рабочий шаг: так всегда есть куда откатиться.</p>
+</div></section>
+
+<section id="prompts"><div class="wrap">
+  <h2>Как писать промпты, которые работают</h2>
+  <div class="compare">
+    <div class="card bad"><h3>Расплывчато</h3><p>«Сделай приложение для задач, чтобы красиво и удобно.»</p></div>
+    <div class="card good"><h3>Конкретно</h3><p>«Сделай одну HTML-страницу со списком задач. Можно добавлять, отмечать выполненными и удалять. Данные хранятся в браузере. Тёмная тема, мобильная вёрстка.»</p></div>
+  </div>
+  <div class="tabs" id="tabs" role="group" aria-label="Шаблоны промптов"></div>
+  <pre id="tpl" style="margin-top:16px"></pre>
+</div></section>
+
+<section id="review"><div class="wrap">
+  <h2>Чек-лист: проверь, прежде чем доверять</h2>
+  <p style="color:var(--muted);margin-top:14px;max-width:60ch">Отмечай пункты по мере проверки. Прогресс сохраняется в этом браузере.</p>
+  <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+  <ul class="checks" id="checks"></ul>
+</div></section>
+
+<section id="plan"><div class="wrap">
+  <h2>План на четыре недели</h2>
+  <div class="plan">
+    <details open><summary>Неделя 1. Первый рабочий проект</summary><ul><li>Выбери одну крошечную идею: конвертер, трекер привычек, заметки.</li><li>Доведи её до состояния «открывается и работает».</li><li>Заведи git и сделай первый коммит.</li></ul></details>
+    <details><summary>Неделя 2. Учись читать код</summary><p>Просишь ИИ объяснить каждый файл простыми словами и находишь, где хранятся данные и где обрабатываются кнопки. Цель — не писать, а понимать структуру.</p></details>
+    <details><summary>Неделя 3. Ошибки и отладка</summary><p>Ломай проект специально: пустой ввод, длинный текст, офлайн. Учись копировать ошибку из консоли в промпт вместе с контекстом.</p></details>
+    <details><summary>Неделя 4. Публикация</summary><p>Выложи проект онлайн, покажи двум знакомым и собери их замечания. Следующий проект начинай с этих замечаний.</p></details>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">Страница сделана для тех, кто начинает вайбкодить. Проверяй результат ИИ сам: он ошибается уверенно.</div></footer>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+  var t=store("theme");if(t==="dark"||t==="light")root.setAttribute("data-theme",t);
+  document.getElementById("theme").addEventListener("click",function(){
+    var dark=root.getAttribute("data-theme")==="dark"||(!root.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
+    var n=dark?"light":"dark";root.setAttribute("data-theme",n);store("theme",n);
+  });
+
+  var demos=[
+    {name:"Список задач",text:"Сделай список задач: можно добавлять, отмечать выполненными и удалять. Данные хранятся в браузере.",
+     html:'<div class="row"><span class="box on"></span>Купить молоко</div><div class="row"><span class="box"></span>Написать промпт</div><div class="row"><span class="box"></span>Сделать коммит</div><span class="btn">+ Добавить</span>'},
+    {name:"Счётчик привычек",text:"Сделай счётчик дней подряд для привычки «читать». Кнопка «Сегодня сделал» и сброс.",
+     html:'<div class="big">12 дней</div><div class="sub">Читать каждый день</div><span class="btn">Сегодня сделал</span>'},
+    {name:"Конвертер валют",text:"Сделай конвертер: поле суммы, выбор двух валют и результат. Курсы пока подставь вручную.",
+     html:'<div class="row">100 EUR</div><div class="row">⇅</div><div class="big">108 USD</div><div class="sub">Курс задан вручную</div>'}
+  ];
+  var pEl=document.getElementById("prompt"),rEl=document.getElementById("result"),cEl=document.getElementById("chips"),timer=null,cur=0;
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function show(i){
+    cur=i;clearInterval(timer);rEl.innerHTML="";
+    var d=demos[i],n=0;
+    [].forEach.call(cEl.children,function(b,j){b.setAttribute("aria-pressed",j===i?"true":"false")});
+    function done(){pEl.textContent=d.text;rEl.innerHTML=d.html}
+    if(reduce){done();return}
+    pEl.innerHTML='<span class="caret"></span>';
+    timer=setInterval(function(){
+      n+=2;
+      if(n>=d.text.length){clearInterval(timer);done();return}
+      pEl.textContent=d.text.slice(0,n);pEl.insertAdjacentHTML("beforeend",'<span class="caret"></span>');
+    },28);
+  }
+  demos.forEach(function(d,i){
+    var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=d.name;
+    b.addEventListener("click",function(){show(i)});cEl.appendChild(b);
+  });
+  show(0);
+
+  var tpls=[
+    {name:"Новая фича",text:"Контекст: у меня есть [проект на ...].\nЗадача: добавь [что именно].\nОграничения: не меняй [что трогать нельзя].\nГотово, когда: [как я проверю результат].\nСначала кратко опиши план, потом код."},
+    {name:"Ошибка",text:"Я делал: [действие].\nОжидал: [что должно было произойти].\nПолучил: [что произошло].\nТекст ошибки:\n[вставь целиком из консоли]\nОбъясни причину, затем предложи минимальное исправление."},
+    {name:"Объяснение кода",text:"Объясни этот файл так, как будто я новичок.\nГде хранятся данные? Что делает каждая функция?\nГде могут быть ошибки при пустом или неверном вводе?\n[вставь код]"}
+  ];
+  var tabs=document.getElementById("tabs"),tpl=document.getElementById("tpl");
+  tpls.forEach(function(p,i){
+    var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=p.name;
+    b.addEventListener("click",function(){
+      [].forEach.call(tabs.children,function(x,j){x.setAttribute("aria-pressed",j===i?"true":"false")});
+      tpl.textContent=p.text;
+    });tabs.appendChild(b);
+    if(i===0){b.setAttribute("aria-pressed","true");tpl.textContent=p.text}
+  });
+
+  var items=[
+    ["Запускается с нуля","Открой проект на чистой вкладке или после перезапуска."],
+    ["Пустой и странный ввод","Попробуй пустое поле, очень длинный текст, спецсимволы."],
+    ["Секреты не в коде","Ключи, пароли и токены лежат в настройках, а не в файле."],
+    ["Понятно, где данные","Ты можешь показать, где они хранятся и кто их видит."],
+    ["Нет лишних зависимостей","Каждую библиотеку ты можешь объяснить одной фразой."],
+    ["Есть откат","Рабочая версия сохранена в git, и ты знаешь, как к ней вернуться."]
+  ];
+  var ul=document.getElementById("checks"),bar=document.getElementById("bar");
+  var saved={};try{saved=JSON.parse(store("checks")||"{}")||{}}catch(e){saved={}}
+  function upd(){
+    var c=ul.querySelectorAll("input:checked").length;bar.style.width=(c/items.length*100)+"%";
+    var s={};[].forEach.call(ul.querySelectorAll("input"),function(i,k){if(i.checked)s[k]=1});store("checks",JSON.stringify(s));
+  }
+  items.forEach(function(it,k){
+    var li=document.createElement("li"),l=document.createElement("label"),i=document.createElement("input"),d=document.createElement("div");
+    i.type="checkbox";i.checked=!!saved[k];i.addEventListener("change",upd);
+    d.innerHTML="<b></b><span></span>";d.firstChild.textContent=it[0];d.lastChild.textContent=it[1];
+    l.appendChild(i);l.appendChild(d);li.appendChild(l);ul.appendChild(li);
+  });
+  upd();
+})();
+</script>
+</body>
+</html>
